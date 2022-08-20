@@ -1,0 +1,8 @@
+CREATE DATABASE IF NOT EXISTS employee_tracker;
+
+USE employee_tracker;
+
+CREATE TABLE department (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL
+);
