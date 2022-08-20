@@ -3,8 +3,7 @@ class Department {
     this.id = id;
     this.name = name;
   }
+  
 }
 
-module.exports = {
-  Department,
-};
+module.exports = { Department };
