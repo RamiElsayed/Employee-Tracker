@@ -1,6 +1,8 @@
 const inquirer = require("inquirer");
 const { Department } = require("./src/models/department");
-const { DepartmentRepository } = require("./src/repositories/departmentRepository");
+const {
+  DepartmentRepository,
+} = require("./src/repositories/departmentRepository");
 const mysql = require("mysql2/promise");
 
 const init = async () => {
@@ -16,33 +18,39 @@ const init = async () => {
 
   const departmentRepository = new DepartmentRepository(db);
 
-  const menu = { 
+  const menu = {
     type: "list",
     name: "choice",
     message: "What do you need to do?",
-    choices: ["View departments", "Add a department"]
+    choices: ["View departments", "Add a department"],
   };
-  const newDepartment = { 
+  const newDepartment = {
     type: "input",
     name: "name",
-    message: "Please enter new department name ?"
+    message: "Please enter new department name ?",
   };
 
   const promptMenu = async () => {
     return await inquirer.prompt(menu).then(async (data) => {
       if (data.choice === menu.choices[0]) {
         await viewDepartments();
-      }
-      else if (data.choice === menu.choices[1]) {
-        return inquirer.prompt(newDepartment).then(async (data) => { 
-          const department = new Department(null, data.name);
-          await departmentRepository.addDepartment(department); 
-          console.log("Department added")
-        });
+      } else if (data.choice === menu.choices[1]) {
+        await addDepartmentPrompt();
       }
     });
-  }
-
+  };
+  const addDepartmentPrompt = async () => {
+    inquirer.prompt(newDepartment).then(async (data) => {
+      try {
+        const department = new Department(null, data.name);
+        await departmentRepository.addDepartment(department);
+        console.log("Department added");
+      } catch (error) {
+        console.error(error.message);
+        return addDepartmentPrompt();
+      }
+    });
+  };
   const viewDepartments = async () => {
     console.log("id  name");
     console.log("--  ------");
@@ -50,7 +58,7 @@ const init = async () => {
     for (let department of departments) {
       console.log(`${department.id}  ${department.name}`);
     }
-  }
+  };
 
   await promptMenu();
 };

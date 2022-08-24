@@ -3,7 +3,7 @@ class Department {
     const regex = RegExp(/^[\s+]/gm);
     const invalidName = regex.test(name);
     if (name === '' || invalidName) {
-      throw new Error("Please enter a dvalid name")
+      throw new Error("please enter a department name");
     }
     this.id = id;
     this.name = name;

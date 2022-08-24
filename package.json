@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "jest --verbose --coverage",
+    "seed": "node src/db/seeds.sql",
     "test:watch": "jest --verbose --coverage"
   },
   "repository": {
