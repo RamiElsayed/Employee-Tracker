@@ -1,14 +1,13 @@
 const inquirer = require("inquirer");
 const { Department } = require("./src/models/department");
-const { printTable } = require('console-table-printer');
-require('dotenv').config();
+const { printTable } = require("console-table-printer");
+require("dotenv").config();
 const {
   DepartmentRepository,
 } = require("./src/repositories/departmentRepository");
-const {
-  RolesRepository,
-} = require("./src/repositories/rolesrepository");
+const { RolesRepository } = require("./src/repositories/rolesrepository");
 const mysql = require("mysql2/promise");
+const { Roles } = require("./src/models/roles");
 
 const init = async () => {
   const db = await mysql.createConnection(
@@ -28,7 +27,7 @@ const init = async () => {
     type: "list",
     name: "choice",
     message: "What do you need to do?",
-    choices: ["View departments", "Add a department","View Roles"],
+    choices: ["View departments", "Add a department", "View Roles", " Add role"],
   };
   const newDepartment = {
     type: "input",
@@ -36,15 +35,35 @@ const init = async () => {
     message: "Please enter new department name ?",
   };
 
+  const newRole = [
+    {
+      type: "input",
+      name: "title",
+      message: "What's the role title ?",
+    },
+    {
+      type: "input",
+      name: "salary",
+      message: "What's the salary ?",
+    },
+    {
+      type: "list",
+      name: "department",
+      choices: function departments () {
+         return departmentRepository.getDepartments();
+      },
+    },
+  ];
   const promptMenu = async () => {
     return await inquirer.prompt(menu).then(async (data) => {
       if (data.choice === menu.choices[0]) {
         await viewDepartments();
       } else if (data.choice === menu.choices[1]) {
         await addDepartmentPrompt();
-      }
-      else if (data.choice === menu.choices[2]) {
+      } else if (data.choice === menu.choices[2]) {
         await viewRoles();
+      } else if (data.choice === menu.choices[3]) {
+        await addRole();
       }
     });
   };
@@ -61,7 +80,20 @@ const init = async () => {
       }
     });
   };
-  
+  const addRole = async ()=> {
+    inquirer.prompt(newRole).then(async (data) => {
+      try {
+        const sql = `SELECT id FROM department WHERE name = (?)`
+        const [rows] = await db.execute(sql, [data.department]);
+        const departmentId = rows[0].id;
+        const role = new Roles(null, data.title, data.salary, departmentId);
+        await rolesRepository.addRole(role);
+      } catch (error) {
+        console.error(error.message);
+        return addRole();
+      }
+    });
+  }
   const viewDepartments = async () => {
     const departments = await departmentRepository.getDepartments();
     printTable(departments);
