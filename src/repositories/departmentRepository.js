@@ -6,7 +6,7 @@ class DepartmentRepository {
   }
 
   getDepartments = async () => {
-    const sql = "SELECT department.id, department.name FROM department";
+    const sql = "SELECT * FROM department";
     let [rows] = await this.db.execute(sql);
     return rows.map((x) => new Department(x.id, x.name));
   };

@@ -1,28 +1,34 @@
 const inquirer = require("inquirer");
 const { Department } = require("./src/models/department");
+const { printTable } = require('console-table-printer');
+require('dotenv').config();
 const {
   DepartmentRepository,
 } = require("./src/repositories/departmentRepository");
+const {
+  RolesRepository,
+} = require("./src/repositories/rolesrepository");
 const mysql = require("mysql2/promise");
 
 const init = async () => {
   const db = await mysql.createConnection(
     {
       host: "localhost",
-      user: "root",
-      password: "Romeoromeo.5264",
-      database: "employee_tracker",
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
     },
     console.log(`Connected to the employee_tracker database.`)
   );
 
   const departmentRepository = new DepartmentRepository(db);
+  const rolesRepository = new RolesRepository(db);
 
   const menu = {
     type: "list",
     name: "choice",
     message: "What do you need to do?",
-    choices: ["View departments", "Add a department"],
+    choices: ["View departments", "Add a department","View Roles"],
   };
   const newDepartment = {
     type: "input",
@@ -37,8 +43,12 @@ const init = async () => {
       } else if (data.choice === menu.choices[1]) {
         await addDepartmentPrompt();
       }
+      else if (data.choice === menu.choices[2]) {
+        await viewRoles();
+      }
     });
   };
+
   const addDepartmentPrompt = async () => {
     inquirer.prompt(newDepartment).then(async (data) => {
       try {
@@ -51,15 +61,15 @@ const init = async () => {
       }
     });
   };
+  
   const viewDepartments = async () => {
-    console.log("id  name");
-    console.log("--  ------");
     const departments = await departmentRepository.getDepartments();
-    for (let department of departments) {
-      console.log(`${department.id}  ${department.name}`);
-    }
+    printTable(departments);
   };
-
+  const viewRoles = async () => {
+    const roles = await rolesRepository.getRoles();
+    printTable(roles);
+  };
   await promptMenu();
 };
 
