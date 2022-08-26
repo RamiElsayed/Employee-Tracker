@@ -1,14 +1,18 @@
+const { emptyValidationMessage } = require('../../src/validation');
 class Roles {
   constructor(id, title, salary, department_id) {
     const regex = RegExp(/^[\s+]/gm);
 
     if (typeof title !== "string" || !title.trim().length|| regex.test(title)) {
-      throw new Error("please enter a salary");
+      throw new Error(emptyValidationMessage('Title'));
     };
 
-    if (salary !== "number" || isNaN(salary) || regex.test(salary) || salary <= 0) {
-      throw new Error("please enter a valid salary amount");
+    if (salary === "" || isNaN(salary) || regex.test(salary) || salary < 0) {
+      throw new Error(emptyValidationMessage('Salary'));
     };
+    if (department_id === "" || regex.test(department_id)) {
+      throw new Error(emptyValidationMessage('Department_Id'));
+    }
     this.id = id;
     this.title = title;
     this.salary = salary;
