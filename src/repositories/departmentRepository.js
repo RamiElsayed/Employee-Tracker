@@ -13,8 +13,8 @@ class DepartmentRepository {
   
 
   addDepartment = async (department) => {
-    if (!department instanceof Department) throw Error("Must be a Department");
-    const sql = `INSERT INTO department (name) VALUES(?)`;
+    if (!(department instanceof Department)) throw Error("Must be a Department");
+    const sql = 'INSERT INTO department (name) VALUES(?)';
     await this.db.execute(sql, [department.name]);
   };
 }
