@@ -8,4 +8,16 @@ describe("Department", () => {
     expect(department.id).toBe(null);
     expect(department.name).toBe("HR");
   });
+  it("This should retrun an error when given empty string", async () => {
+    const createDepartment = () => new Department(null, "");
+    expect(createDepartment).toThrowError("please enter a department name");
+  });
+  it("This should retrun an error when given white spaces", async () => {
+    const createDepartment = () => new Department(null, "  ");
+    expect(createDepartment).toThrowError("please enter a department name");
+  });
+  it("This should retrun an error when given white spaces", async () => {
+    const createDepartment = () => new Department(null, 12);
+    expect(createDepartment).toThrowError("please enter a department name");
+  });
 });
