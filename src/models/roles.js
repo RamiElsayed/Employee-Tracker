@@ -1,5 +1,5 @@
 const { emptyValidationMessage } = require('../../src/validation');
-class Roles {
+class Role {
   constructor(id, title, salary, department_id) {
     const regex = RegExp(/^[\s+]/gm);
 
@@ -20,4 +20,4 @@ class Roles {
   }
 }
 
-module.exports = { Roles };
+module.exports = { Role };
