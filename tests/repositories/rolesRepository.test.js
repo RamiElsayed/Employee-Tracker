@@ -1,4 +1,4 @@
-const { describe, expect, test, it } = require("@jest/globals");
+const { describe, expect, it } = require("@jest/globals");
 const { Role } = require("../../src/models/roles");
 const { RolesRepository } = require("../../src/repositories/rolesRepository");
 
@@ -26,7 +26,7 @@ describe("RolesRepository", () => {
 
     expect(executeMock).toHaveBeenCalledTimes(1);
     expect(executeMock).toBeCalledWith(
-      "SELECT roles.id, roles.title, roles.salary, department.name AS department  FROM roles JOIN department ON roles.department = department.id"
+      "SELECT roles.id, roles.title, roles.salary, department.name AS department FROM roles JOIN department ON roles.department = department.id"
     );
     expect(roles).toEqual(expectedRoles);
   });

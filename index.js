@@ -6,6 +6,9 @@ const {
   DepartmentRepository,
 } = require("./src/repositories/departmentRepository");
 const { RolesRepository } = require("./src/repositories/rolesrepository");
+const {
+  EmployeesRepository,
+} = require("./src/repositories/employeesRepository");
 const mysql = require("mysql2/promise");
 const { Role } = require("./src/models/roles");
 
@@ -22,12 +25,19 @@ const init = async () => {
 
   const departmentRepository = new DepartmentRepository(db);
   const rolesRepository = new RolesRepository(db);
+  const employeesRepository = new EmployeesRepository(db);
 
   const menu = {
     type: "list",
     name: "choice",
     message: "What do you need to do?",
-    choices: ["View departments", "Add a department", "View Roles", " Add role"],
+    choices: [
+      "View Departments",
+      "Add a Department",
+      "View Roles",
+      " Add Role",
+      "View Employees",
+    ],
   };
   const newDepartment = {
     type: "input",
@@ -49,8 +59,8 @@ const init = async () => {
     {
       type: "list",
       name: "department",
-      choices: function departments () {
-         return departmentRepository.getDepartments();
+      choices: function departments() {
+        return departmentRepository.getDepartments();
       },
     },
   ];
@@ -64,9 +74,8 @@ const init = async () => {
         await viewRoles();
       } else if (data.choice === menu.choices[3]) {
         await addRole();
-      }
-        else if (data.choice === menu.choices[4]) {
-        await viewEployees();
+      } else if (data.choice === menu.choices[4]) {
+        await viewEmployees();
       }
     });
   };
@@ -83,10 +92,10 @@ const init = async () => {
       }
     });
   };
-  const addRole = async ()=> {
+  const addRole = async () => {
     inquirer.prompt(newRole).then(async (data) => {
       try {
-        const sql = `SELECT id FROM department WHERE name = (?)`
+        const sql = `SELECT id FROM department WHERE name = (?)`;
         const [rows] = await db.execute(sql, [data.department]);
         const departmentId = rows[0].id;
         const role = new Role(null, data.title, data.salary, departmentId);
@@ -96,7 +105,7 @@ const init = async () => {
         return addRole();
       }
     });
-  }
+  };
   const viewDepartments = async () => {
     const departments = await departmentRepository.getDepartments();
     printTable(departments);
@@ -105,8 +114,8 @@ const init = async () => {
     const roles = await rolesRepository.getRoles();
     printTable(roles);
   };
-  const viewEmployee = async () => {
-    const employees = await employeesRepository.getemployees();
+  const viewEmployees = async () => {
+    const employees = await employeesRepository.getEmployees();
     printTable(employees);
   };
   await promptMenu();
