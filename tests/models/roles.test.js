@@ -1,4 +1,4 @@
-const { describe, expect, test, it } = require("@jest/globals");
+const { describe, expect,it } = require("@jest/globals");
 const { Role } = require("../../src/models/roles");
 const { emptyValidationMessage } = require('../../src/validation');
 
@@ -9,27 +9,27 @@ describe("role", () => {
     expect(role.id).toBe(1);
     expect(role.title).toBe("Accountant");
     expect(role.salary).toBe(80000);
-    expect(role.department_id).toBe(2);
+    expect(role.department).toBe(2);
   });
   it.each([
     ["Title", 2, " ", 80000, 3],
     ["Salary", 2, "Accountant", " ", "ramielsayed"],
-    ["Department_Id", 2, "Accountant" , 80000, " "],
+    ["Department", 2, "Accountant" , 80000, " "],
   ])(
     "constructor when %s is whitespace",
-    (property, id, title, salary, department_id) => {
-      const createRole = () => new Role(id, title, salary, department_id);
+    (property, id, title, salary, department) => {
+      const createRole = () => new Role(id, title, salary, department);
       expect(createRole).toThrowError(emptyValidationMessage(property));
     }
   );
   it.each([
     ["Title", 2, "", 80000, 3],
     ["Salary", 2, "Accountant", "", "ramielsayed"],
-    ["Department_Id", 2, "Accountant" , 80000, ""],
+    ["Department", 2, "Accountant" , 80000, ""],
   ])(
     "constructor when %s is empty",
-    (property, id, title, salary, department_id) => {
-      const createRole = () => new Role(id, title, salary, department_id);
+    (property, id, title, salary, department) => {
+      const createRole = () => new Role(id, title, salary, department);
       expect(createRole).toThrowError(emptyValidationMessage(property));
     }
   );

@@ -5,8 +5,8 @@ const { RolesRepository } = require("../../src/repositories/rolesRepository");
 describe("RolesRepository", () => {
   it("getRoles", async () => {
     const expectedRoles = [
-      { id: 1, title: "Accountant", salary: 80000, department_id: 2 },
-      { id: 1, title: "Engineer", salary: 90000, department_id: 3 },
+      { id: 1, title: "Accountant", salary: 80000, department: 2 },
+      { id: 1, title: "Engineer", salary: 90000, department: 3 },
     ];
 
     const executeMock = jest.fn();
@@ -52,7 +52,7 @@ describe("RolesRepository", () => {
     expect(executeMock).toHaveBeenCalledTimes(1);
     expect(executeMock).toHaveBeenCalledWith(
       "INSERT INTO roles (title,salary,department) VALUES (?,?,?)",
-      [role.title, role.salary, role.department_id]
+      [role.title, role.salary, role.department]
     );
   });
 
@@ -61,7 +61,7 @@ describe("RolesRepository", () => {
       id: 2,
       title: "Accountant",
       salary: 80000,
-      department_id: 2,
+      department: 2,
     };
 
     const executeMock = jest.fn();
