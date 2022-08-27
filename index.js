@@ -7,7 +7,7 @@ const {
 } = require("./src/repositories/departmentRepository");
 const { RolesRepository } = require("./src/repositories/rolesrepository");
 const mysql = require("mysql2/promise");
-const { Roles } = require("./src/models/roles");
+const { Role } = require("./src/models/roles");
 
 const init = async () => {
   const db = await mysql.createConnection(
@@ -65,6 +65,9 @@ const init = async () => {
       } else if (data.choice === menu.choices[3]) {
         await addRole();
       }
+        else if (data.choice === menu.choices[4]) {
+        await viewEployees();
+      }
     });
   };
 
@@ -86,7 +89,7 @@ const init = async () => {
         const sql = `SELECT id FROM department WHERE name = (?)`
         const [rows] = await db.execute(sql, [data.department]);
         const departmentId = rows[0].id;
-        const role = new Roles(null, data.title, data.salary, departmentId);
+        const role = new Role(null, data.title, data.salary, departmentId);
         await rolesRepository.addRole(role);
       } catch (error) {
         console.error(error.message);
@@ -101,6 +104,10 @@ const init = async () => {
   const viewRoles = async () => {
     const roles = await rolesRepository.getRoles();
     printTable(roles);
+  };
+  const viewEmployee = async () => {
+    const employees = await employeesRepository.getemployees();
+    printTable(employees);
   };
   await promptMenu();
 };
