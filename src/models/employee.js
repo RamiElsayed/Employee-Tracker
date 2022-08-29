@@ -1,32 +1,37 @@
 const { emptyValidationMessage } = require('../../src/validation');
+const { Role } = require('./roles');
 class Employee {
-  constructor(id, first_name, last_name, title, department, salary, manager) {
+  constructor(id, firstName, lastName, role, manager) {
     const regex = RegExp(/^[\s+]/gm);
 
-    if (typeof first_name !== "string" || !(isNaN(first_name)) || !(first_name.trim().length)|| regex.test(first_name)) {
-      throw new Error(emptyValidationMessage('First_name'));
+    if (typeof firstName !== "string" || !(isNaN(firstName)) || !(firstName.trim().length)|| regex.test(firstName)) {
+      throw new Error(emptyValidationMessage('First name'));
     };
 
-    if (typeof last_name !== "string" || !(isNaN(last_name))|| !(last_name.trim().length) || regex.test(last_name) ) {
-      throw new Error(emptyValidationMessage('Last_name'));
+    if (typeof lastName !== "string" || !(isNaN(lastName))|| !(lastName.trim().length) || regex.test(lastName) ) {
+      throw new Error(emptyValidationMessage('Last name'));
     }
-    if (typeof title !== "string" || !(isNaN(title))|| !(title.trim().length) || regex.test(title) ) {
-      throw new Error(emptyValidationMessage('Title'));
-    }
+    
+    if (!role)
+      throw Error(emptyValidationMessage('Role'));
+    if (!(role instanceof Role))
+      throw Error("Role must be a Role");
     if (typeof department !== "string" || !(isNaN(department))|| !(department.trim().length) || regex.test(department) ) {
       throw new Error(emptyValidationMessage('Department'));
     }
     if (salary === "" || isNaN(salary)|| regex.test(salary)) {
       throw new Error(emptyValidationMessage('Salary'));
     }
-    if (typeof manager !== "string" || !(isNaN(manager))|| !(manager.trim().length) || regex.test(manager) ) {
+    if (!(manager instanceof Employee))
+      throw Error("Manager must be an Employee");
+    /*if (typeof manager !== "string" || !(isNaN(manager))|| !(manager.trim().length) || regex.test(manager) ) {
       throw new Error(emptyValidationMessage('Manager'));
-    }
+    }*/
     this.id = id;
-    this.first_name = first_name;
-    this.last_name = last_name;
-    this.title = title,
-    this.department = department,
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.role = role;
+    this.department = department;
     this.salary = salary;
     this.manager = manager;
   }

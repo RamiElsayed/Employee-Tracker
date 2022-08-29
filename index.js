@@ -11,6 +11,7 @@ const {
 } = require("./src/repositories/employeesRepository");
 const mysql = require("mysql2/promise");
 const { Role } = require("./src/models/roles");
+const { Employee } = require("./src/models/employee");
 
 const init = async () => {
   const db = await mysql.createConnection(
@@ -37,6 +38,7 @@ const init = async () => {
       "View Roles",
       " Add Role",
       "View Employees",
+      "Add New Employee"
     ],
   };
   const newDepartment = {
@@ -64,6 +66,29 @@ const init = async () => {
       },
     },
   ];
+  const getNewEmployeeQuestions = (roleTitles, employees) => [
+    {
+      type: "input",
+      name: "first_name",
+      message: "What's the employee's first name ?",
+    },
+    {
+      type: "input",
+      name: "last_name",
+      message: "What's the employee's last name ?",
+    },
+    {
+      type: "list",
+      name: "title",
+      message: "What's the employee's role ?",
+      choices: roleTitles
+    },{
+      type: "list",
+      name: "manager",
+      message: "What's the employee's manager ?",
+      choices: employees
+    },
+  ];
   const promptMenu = async () => {
     return await inquirer.prompt(menu).then(async (data) => {
       if (data.choice === menu.choices[0]) {
@@ -76,6 +101,9 @@ const init = async () => {
         await addRole();
       } else if (data.choice === menu.choices[4]) {
         await viewEmployees();
+      }
+        else if (data.choice === menu.choices[5]) {
+        await addEmployee();
       }
     });
   };
@@ -93,7 +121,7 @@ const init = async () => {
     });
   };
   const addRole = async () => {
-    inquirer.prompt(newRole).then(async (data) => {
+     inquirer.prompt(newRole).then(async (data) => {
       try {
         const sql = `SELECT id FROM department WHERE name = (?)`;
         const [rows] = await db.execute(sql, [data.department]);
@@ -104,6 +132,26 @@ const init = async () => {
         console.error(error.message);
         return addRole();
       }
+    });
+  };
+  const addEmployee = async () => {
+    const roles = await rolesRepository.getRoles();
+    const roleTitles = roles.map(x => x.title);
+    const employees = await employeesRepository.getManagerName();
+
+    const newEmployeeQuestions = getNewEmployeeQuestions(roleTitles, employees);
+    inquirer.prompt(newEmployeeQuestions).then(async (data) => {
+        try {
+          const role = roles.find(x => x.title == data.title);
+          const sql2 = `SELECT name FROM department where id= (?)`;
+          const [department] = await db.execute(sql2, [rows[0].department]);
+          
+          const employee = new Employee(null, data.first_name, data.last_name, data.title, department[0].name, role.salary, data.manager);
+          await employeesRepository.addEmployee(employee);
+        } catch (error) {
+          console.error(error.message);
+          return addEmployee();
+        };
     });
   };
   const viewDepartments = async () => {

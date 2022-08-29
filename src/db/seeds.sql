@@ -5,13 +5,16 @@ VALUES  ("Management"),
         ("Accountancy"),
         ("Engineering");
 
-INSERT INTO roles (title, salary, department) 
+INSERT INTO roles (title, salary, departmentId) 
 VALUES  ("Sales Manager",100000, 1),
         ("Accountant",80000, 2),
         ("Engineer", 90000, 3);
 
-INSERT INTO employee (first_name, last_name, manager, role) 
-VALUES  ("Rami","Badr", "John Smith", 2),
-        ("John","Smith", Null, 1),
-        ("Tom", "Smith", "John Smith", 3);
-        
+INSERT INTO employee (firstName, lastName, managerId, roleId)
+VALUES ("John", "Smith", NULL, 1);
+
+INSERT INTO employee (firstName, lastName, managerId, roleId)
+VALUES ("Tom", "Smith", 1, 3);
+
+INSERT INTO employee (firstName, lastName, managerId, roleId)
+VALUES ("Rami", "Badr", 2, 2);

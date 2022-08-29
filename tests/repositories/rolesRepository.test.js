@@ -1,18 +1,26 @@
 const { describe, expect, it } = require("@jest/globals");
+const { Department } = require("../../src/models/department");
 const { Role } = require("../../src/models/roles");
 const { RolesRepository } = require("../../src/repositories/rolesRepository");
 
 describe("RolesRepository", () => {
+  const department = new Department(1, "Finance");
+
   it("getRoles", async () => {
-    const expectedRoles = [
-      { id: 1, title: "Accountant", salary: 80000, department: 2 },
-      { id: 1, title: "Engineer", salary: 90000, department: 3 },
+    const roleData = [
+      { roleId: 1, roleTitle: "Accountant", roleSalary: 80000, departmentId: 2, departmentName: "Finance" },
+      { roleId: 2, roleTitle: "Engineer", roleSalary: 90000, departmentId: 3, departmentName: "Manufacturing" },
     ];
+    
+    const expectedRoles = [
+      new Role(1, "Accountant", 80000, new Department(2, "Finance")),
+      new Role(2, "Engineer", 90000, new Department(3, "Manufacturing"))
+    ]
 
     const executeMock = jest.fn();
     const DbMock = jest.fn();
 
-    executeMock.mockImplementation(() => Promise.resolve([expectedRoles]));
+    executeMock.mockImplementation(() => Promise.resolve([roleData]));
     DbMock.mockImplementation(() => {
       return {
         execute: executeMock,
@@ -25,14 +33,21 @@ describe("RolesRepository", () => {
     const roles = await rolesRepository.getRoles();
 
     expect(executeMock).toHaveBeenCalledTimes(1);
-    expect(executeMock).toBeCalledWith(
-      "SELECT roles.id, roles.title, roles.salary, department.name AS department FROM roles JOIN department ON roles.department = department.id"
+    expect(executeMock).toBeCalledWith(`
+    SELECT
+      roles.id roleId,
+      roles.title roleTitle,
+      roles.salary roleSalary,
+      department.id departmentId,
+      department.name departmentName
+    FROM roles
+    JOIN department ON roles.department = department.id`
     );
     expect(roles).toEqual(expectedRoles);
   });
 
   it("addRoles", async () => {
-    const role = new Role(null, "Accountant", 90000, 4);
+    const role = new Role(null, "Accountant", 90000, department);
 
     const executeMock = jest.fn();
     const DbMock = jest.fn();
@@ -52,7 +67,7 @@ describe("RolesRepository", () => {
     expect(executeMock).toHaveBeenCalledTimes(1);
     expect(executeMock).toHaveBeenCalledWith(
       "INSERT INTO roles (title,salary,department) VALUES (?,?,?)",
-      [role.title, role.salary, role.department]
+      [role.title, role.salary, role.department.id]
     );
   });
 
@@ -61,7 +76,7 @@ describe("RolesRepository", () => {
       id: 2,
       title: "Accountant",
       salary: 80000,
-      department: 2,
+      department,
     };
 
     const executeMock = jest.fn();
@@ -83,7 +98,7 @@ describe("RolesRepository", () => {
     );
   });
 
-  it("addRole with anonymous object should throw", async () => {
+  it("addRole with null should throw", async () => {
 
     const executeMock = jest.fn();
     const DbMock = jest.fn();

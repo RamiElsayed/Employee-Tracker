@@ -1,3 +1,4 @@
+const { Department } = require("../models/department");
 const { Role } = require("../models/roles");
 
 class RolesRepository {
@@ -6,18 +7,29 @@ class RolesRepository {
   }
 
   getRoles = async () => {
-    const sql =
-      "SELECT roles.id, roles.title, roles.salary, department.name AS department FROM roles JOIN department ON roles.department = department.id";
+    const sql = `
+    SELECT
+      roles.id roleId,
+      roles.title roleTitle,
+      roles.salary roleSalary,
+      department.id departmentId,
+      department.name departmentName
+    FROM roles
+    JOIN department ON roles.departmentId = department.id`;
     let [rows] = await this.db.execute(sql);
-    return rows.map(x => new Role(x.id, x.title, x.salary, x.department));
+    
+    return rows.map((x) => {
+      const department = new Department(x.departmentId, x.departmentName);
+      return new Role(x.roleId, x.roleTitle, x.roleSalary, department);
+    });
   };
-
+  
   addRole = async (role) => {
     if (!(role instanceof Role)) throw Error("Must be a Role");
-    const sql = `INSERT INTO roles (title,salary,department) VALUES (?,?,?)`;
-    console.log('add role');
-    await this.db.execute(sql,[role.title, role.salary, role.department]);
-    console.log('done adding role');
+    const sql = `INSERT INTO roles (title,salary,departmentId) VALUES (?,?,?)`;
+    console.log("add role");
+    await this.db.execute(sql, [role.title, role.salary, role.department.id]);
+    console.log("done adding role");
   };
 }
 
