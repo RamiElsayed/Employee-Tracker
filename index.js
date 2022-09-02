@@ -38,7 +38,7 @@ const init = async () => {
       "View Roles",
       "Add Role",
       "View Employees",
-      "Add New Employee"
+      "Add New Employee",
     ],
   };
   const newDepartment = {
@@ -61,8 +61,8 @@ const init = async () => {
     {
       type: "list",
       name: "department",
-      choices: departments
-    }
+      choices: departments,
+    },
   ];
   const getNewEmployeeQuestions = (roleTitles, employees) => [
     {
@@ -79,12 +79,13 @@ const init = async () => {
       type: "list",
       name: "role",
       message: "What's the employee's role ?",
-      choices: roleTitles
-    },{
+      choices: roleTitles,
+    },
+    {
       type: "list",
       name: "manager",
       message: "Who's the employee's manager ?",
-      choices: employees
+      choices: employees,
     },
   ];
   const promptMenu = async () => {
@@ -99,8 +100,7 @@ const init = async () => {
         await addRole();
       } else if (data.choice === menu.choices[4]) {
         await viewEmployees();
-      }
-        else if (data.choice === menu.choices[5]) {
+      } else if (data.choice === menu.choices[5]) {
         await addEmployee();
       }
     });
@@ -121,9 +121,9 @@ const init = async () => {
   const addRole = async () => {
     const departments = await departmentRepository.getDepartments();
     const newRoleQuestions = getNewRoleQuestions(departments);
-     inquirer.prompt(newRoleQuestions).then(async (data) => {
+    inquirer.prompt(newRoleQuestions).then(async (data) => {
       try {
-        const department = departments.find(x => x.name == data.department);
+        const department = departments.find((x) => x.name == data.department);
         const role = new Role(null, data.title, data.salary, department);
         await rolesRepository.addRole(role);
       } catch (error) {
@@ -134,20 +134,29 @@ const init = async () => {
   };
   const addEmployee = async () => {
     const roles = await rolesRepository.getRoles();
-    const roleTitles = roles.map(x => x.title);
+    const roleTitles = roles.map((x) => x.title);
     const employees = await employeesRepository.getEmployees();
-    
+
     const newEmployeeQuestions = getNewEmployeeQuestions(roleTitles, employees);
     inquirer.prompt(newEmployeeQuestions).then(async (data) => {
-        try {
-          const role = roles.find(x => x.title == data.role);
-          
-          const employee = new Employee(null, data.firstName, data.lastName, role, data.manager);
-          await employeesRepository.addEmployee(employee);
-        } catch (error) {
-          console.error(error.message);
-          return addEmployee();
-        };
+      try {
+        const role = roles.find((x) => x.title == data.role);
+        const manager = employees.find(
+          (x) => data.manager == `${x.firstName} ${x.lastName}`
+        );
+        console.log(manager);
+        const employee = new Employee(
+          null,
+          data.firstName,
+          data.lastName,
+          role,
+          manager
+        );
+        await employeesRepository.addEmployee(employee);
+      } catch (error) {
+        console.error(error.message);
+        return addEmployee();
+      }
     });
   };
   const viewDepartments = async () => {
@@ -156,7 +165,7 @@ const init = async () => {
   };
   const viewRoles = async () => {
     const roles = await rolesRepository.getRoles();
-    roles.forEach(x => x.department = x.department.name);
+    roles.forEach((x) => (x.department = x.department.name));
     printTable(roles);
   };
   const viewEmployees = async () => {

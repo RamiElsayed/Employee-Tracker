@@ -1,6 +1,9 @@
 const { Department } = require("../models/department");
 const { Employee } = require("../models/employee");
-const { EmployeeDashboardItem, EmployeeDashboard } = require("../models/employeeDashboard");
+const {
+  EmployeeDashboardItem,
+  EmployeeDashboard,
+} = require("../models/employeeDashboard");
 const { Role } = require("../models/roles");
 
 class EmployeesRepository {
@@ -25,9 +28,20 @@ class EmployeesRepository {
     LEFT JOIN employee m ON e.managerId = m.id`;
 
     let [rows] = await this.db.execute(sql);
-    const items = rows.map(x => new EmployeeDashboardItem(x.id, x.firstName, x.lastName, x.title, x.department, x.salary, x.manager));
+    const items = rows.map(
+      (x) =>
+        new EmployeeDashboardItem(
+          x.id,
+          x.firstName,
+          x.lastName,
+          x.title,
+          x.department,
+          x.salary,
+          x.manager
+        )
+    );
     return new EmployeeDashboard(items);
-  }
+  };
 
   getEmployees = async () => {
     const sql = `
@@ -47,21 +61,13 @@ class EmployeesRepository {
     return rows.map((x) => {
       const department = new Department(x.departmentId, x.departmentName);
       const role = new Role(x.roleId, x.roleTitle, x.roleSalary, department);
-      return new Employee(
-        x.id,
-        x.firstName,
-        x.lastName,
-        role
-      );
+      return new Employee(x.id, x.firstName, x.lastName, role);
     });
   };
 
   addEmployee = async (employee) => {
     console.log(employee);
     if (!(employee instanceof Employee)) throw Error("Must be a employee");
-    const titleSql = `SELECT id FROM roles where title= (?)`;
-    const [rows] = await db.execute(titleSql, [employee.title]);
-    
     const sql =
       "INSERT INTO employee (firstName, lastName, roleId, managerId) VALUES (?,?,?,?)";
     console.log("add employee");
@@ -69,7 +75,7 @@ class EmployeesRepository {
       employee.firstName,
       employee.lastName,
       employee.role.id,
-      employee.manager.id
+      employee.manager.id,
     ]);
     console.log("done adding employee");
   };
