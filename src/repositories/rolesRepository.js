@@ -17,7 +17,6 @@ class RolesRepository {
     FROM roles
     JOIN department ON roles.departmentId = department.id`;
     let [rows] = await this.db.execute(sql);
-    
     return rows.map((x) => {
       const department = new Department(x.departmentId, x.departmentName);
       return new Role(x.roleId, x.roleTitle, x.roleSalary, department);
