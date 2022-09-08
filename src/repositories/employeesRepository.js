@@ -60,13 +60,13 @@ class EmployeesRepository {
     let [rows] = await this.db.execute(sql);
     return rows.map((x) => {
       const department = new Department(x.departmentId, x.departmentName);
+
       const role = new Role(x.roleId, x.roleTitle, x.roleSalary, department);
       return new Employee(x.id, x.firstName, x.lastName, role);
     });
   };
 
   addEmployee = async (employee) => {
-    console.log(employee);
     if (!(employee instanceof Employee)) throw Error("Must be a employee");
     const sql =
       "INSERT INTO employee (firstName, lastName, roleId, managerId) VALUES (?,?,?,?)";
@@ -78,6 +78,14 @@ class EmployeesRepository {
       employee.manager.id,
     ]);
     console.log("done adding employee");
+  };
+  updateEmployeeRole = async (employee, role) => {
+    if (!(employee instanceof Employee)) throw Error("Must be a employee");
+    if (!(role instanceof Role)) throw Error("Must be a role");
+    const sql = "UPDATE employee SET roleId = (?) WHERE id = (?)";
+    console.log("update role");
+    await this.db.execute(sql, [role.id, employee.id]);
+    console.log("done updating employee role");
   };
 }
 

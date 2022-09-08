@@ -10,23 +10,23 @@ class Employee {
       !firstName.trim().length ||
       regex.test(firstName)
     ) {
-      throw new Error(emptyValidationMessage("First name"));
+      throw Error(emptyValidationMessage("First name"));
     }
-
     if (
       typeof lastName !== "string" ||
       !isNaN(lastName) ||
       !lastName.trim().length ||
       regex.test(lastName)
     ) {
-      throw new Error(emptyValidationMessage("Last name"));
+      throw Error(emptyValidationMessage("Last name"));
     }
     if (!role) throw Error(emptyValidationMessage("Role"));
     if (!(role instanceof Role)) throw Error("Role must be a Role");
 
-    if (!manager) throw Error(emptyValidationMessage("Manager"));
-    if (!(manager instanceof Employee))
-      throw Error("Department must be a Department");
+    if (manager) {
+      if (!(manager instanceof Employee))
+        throw Error("Manager must be an employee");
+    }
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;

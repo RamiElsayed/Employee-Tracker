@@ -23,7 +23,6 @@ const init = async () => {
     },
     console.log(`Connected to the employee_tracker database.`)
   );
-
   const departmentRepository = new DepartmentRepository(db);
   const rolesRepository = new RolesRepository(db);
   const employeesRepository = new EmployeesRepository(db);
@@ -39,6 +38,8 @@ const init = async () => {
       "Add Role",
       "View Employees",
       "Add New Employee",
+      "Update Employee Role",
+      "Quit",
     ],
   };
   const newDepartment = {
@@ -47,6 +48,19 @@ const init = async () => {
     message: "Please enter new department name ?",
   };
 
+  const editEmployeeRoleQuestions = (employees, roleTitles) => [
+    {
+      type: "list",
+      name: "employee",
+      choices: employees,
+    },
+    {
+      type: "list",
+      name: "role",
+      message: "Please choose the new role",
+      choices: roleTitles,
+    },
+  ];
   const getNewRoleQuestions = (departments) => [
     {
       type: "input",
@@ -102,19 +116,44 @@ const init = async () => {
         await viewEmployees();
       } else if (data.choice === menu.choices[5]) {
         await addEmployee();
+      } else if (data.choice === menu.choices[6]) {
+        await editRole();
+      } else if (data.choice === menu.choices[7]) {
+        process.exit();
       }
     });
   };
 
+  const editRole = async () => {
+    const employees = await employeesRepository.getEmployees();
+    const roles = await rolesRepository.getRoles();
+
+    const roleTitles = roles.map((x) => x.title);
+    inquirer
+      .prompt(editEmployeeRoleQuestions(employees, roleTitles))
+      .then(async (data) => {
+        try {
+          const employee = employees.find((x) => x.name == data.employee);
+          const role = roles.find((x) => x.title == data.role);
+          await employeesRepository.updateEmployeeRole(employee, role);
+          console.log("updated employee role");
+          promptMenu();
+        } catch (error) {
+          console.error(error.message);
+          return await editRole();
+        }
+      });
+  };
   const addDepartmentPrompt = async () => {
     inquirer.prompt(newDepartment).then(async (data) => {
       try {
         const department = new Department(null, data.name);
         await departmentRepository.addDepartment(department);
         console.log("Department added");
+        promptMenu();
       } catch (error) {
         console.error(error.message);
-        return addDepartmentPrompt();
+        return await addDepartmentPrompt();
       }
     });
   };
@@ -126,9 +165,10 @@ const init = async () => {
         const department = departments.find((x) => x.name == data.department);
         const role = new Role(null, data.title, data.salary, department);
         await rolesRepository.addRole(role);
+        promptMenu();
       } catch (error) {
         console.error(error.message);
-        return addRole();
+        return await addRole();
       }
     });
   };
@@ -144,7 +184,6 @@ const init = async () => {
         const manager = employees.find(
           (x) => data.manager == `${x.firstName} ${x.lastName}`
         );
-        console.log(manager);
         const employee = new Employee(
           null,
           data.firstName,
@@ -153,24 +192,28 @@ const init = async () => {
           manager
         );
         await employeesRepository.addEmployee(employee);
+        promptMenu();
       } catch (error) {
         console.error(error.message);
-        return addEmployee();
+        return await addEmployee();
       }
     });
   };
   const viewDepartments = async () => {
     const departments = await departmentRepository.getDepartments();
     printTable(departments);
+    promptMenu();
   };
   const viewRoles = async () => {
     const roles = await rolesRepository.getRoles();
     roles.forEach((x) => (x.department = x.department.name));
     printTable(roles);
+    promptMenu();
   };
   const viewEmployees = async () => {
     const dashboard = await employeesRepository.getEmployeeDashboard();
     dashboard.display();
+    promptMenu();
   };
   await promptMenu();
 };
