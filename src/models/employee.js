@@ -23,7 +23,7 @@ class Employee {
     if (!role) throw Error(emptyValidationMessage("Role"));
     if (!(role instanceof Role)) throw Error("Role must be a Role");
 
-    if (manager) {
+    if (manager !== undefined) {
       if (!(manager instanceof Employee))
         throw Error("Manager must be an employee");
     }

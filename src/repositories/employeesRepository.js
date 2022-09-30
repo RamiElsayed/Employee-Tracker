@@ -1,3 +1,4 @@
+const { formatSql } = require("../formatting");
 const { Department } = require("../models/department");
 const { Employee } = require("../models/employee");
 const {
@@ -44,8 +45,7 @@ class EmployeesRepository {
   };
 
   getEmployees = async () => {
-    const sql = `
-    SELECT
+    const sql = formatSql(`SELECT
       e.id id,
       e.firstName firstName,
       e.lastName lastName,
@@ -56,7 +56,7 @@ class EmployeesRepository {
       d.name departmentName
     FROM employee e
     JOIN roles r ON e.roleId = r.id
-    JOIN department d ON r.departmentId = d.id`;
+    JOIN department d ON r.departmentId = d.id`);
     let [rows] = await this.db.execute(sql);
     return rows.map((x) => {
       const department = new Department(x.departmentId, x.departmentName);

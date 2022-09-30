@@ -8,14 +8,26 @@ describe("RolesRepository", () => {
 
   it("getRoles", async () => {
     const roleData = [
-      { roleId: 1, roleTitle: "Accountant", roleSalary: 80000, departmentId: 2, departmentName: "Finance" },
-      { roleId: 2, roleTitle: "Engineer", roleSalary: 90000, departmentId: 3, departmentName: "Manufacturing" },
+      {
+        roleId: 1,
+        roleTitle: "Accountant",
+        roleSalary: 80000,
+        departmentId: 2,
+        departmentName: "Finance",
+      },
+      {
+        roleId: 2,
+        roleTitle: "Engineer",
+        roleSalary: 90000,
+        departmentId: 3,
+        departmentName: "Manufacturing",
+      },
     ];
-    
+
     const expectedRoles = [
       new Role(1, "Accountant", 80000, new Department(2, "Finance")),
-      new Role(2, "Engineer", 90000, new Department(3, "Manufacturing"))
-    ]
+      new Role(2, "Engineer", 90000, new Department(3, "Manufacturing")),
+    ];
 
     const executeMock = jest.fn();
     const DbMock = jest.fn();
@@ -41,8 +53,7 @@ describe("RolesRepository", () => {
       department.id departmentId,
       department.name departmentName
     FROM roles
-    JOIN department ON roles.department = department.id`
-    );
+    JOIN department ON roles.departmentId = department.id`);
     expect(roles).toEqual(expectedRoles);
   });
 
@@ -66,7 +77,7 @@ describe("RolesRepository", () => {
 
     expect(executeMock).toHaveBeenCalledTimes(1);
     expect(executeMock).toHaveBeenCalledWith(
-      "INSERT INTO roles (title,salary,department) VALUES (?,?,?)",
+      "INSERT INTO roles (title,salary,departmentId) VALUES (?,?,?)",
       [role.title, role.salary, role.department.id]
     );
   });
@@ -99,7 +110,6 @@ describe("RolesRepository", () => {
   });
 
   it("addRole with null should throw", async () => {
-
     const executeMock = jest.fn();
     const DbMock = jest.fn();
 
@@ -107,13 +117,15 @@ describe("RolesRepository", () => {
     DbMock.mockImplementation(() => {
       return {
         execute: executeMock,
-      }
+      };
     });
 
     const dbMock = new DbMock();
 
     const rolesRepository = new RolesRepository(dbMock);
 
-    await expect(rolesRepository.addRole(null)).rejects.toThrow("Must be a Role");
-  })
+    await expect(rolesRepository.addRole(null)).rejects.toThrow(
+      "Must be a Role"
+    );
+  });
 });

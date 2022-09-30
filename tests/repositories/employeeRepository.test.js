@@ -1,31 +1,73 @@
 const { describe, expect, it } = require("@jest/globals");
+const { formatSql } = require("../../src/formatting");
+const { Department } = require("../../src/models/department");
 const { Employee } = require("../../src/models/employee");
-const { EmployeesRepository } = require("../../src/repositories/employeesRepository");
+const { Role } = require("../../src/models/roles");
+const {
+  EmployeesRepository,
+} = require("../../src/repositories/employeesRepository");
 
 describe("EmployeesRepository", () => {
-    it("getEmployees", async () => {
-        const expectedEmployees = [
-            {id: 2, firstName: "Rami", lastName: "Badr", title: "Web Developer", department: "Development", salary: 35000, manager: "Ben"},
-            {id: 3, firstName: "John", lastName: "Smith", title: "Web Developer", department: "Development", salary: 35000, manager: "Ben"},
-        ];
+  it("getEmployees", async () => {
+    const employeeData = [
+      {
+        id: 2,
+        firstName: "Rami",
+        lastName: "Badr",
+        roleId: 2,
+        roleTitle: "Web Developer",
+        roleSalary: 35000,
+        departmentId: 2,
+        departmentName: "Development",
+      },
+      {
+        id: 3,
+        firstName: "John",
+        lastName: "Smith",
+        roleId: 3,
+        roleTitle: "Web Developer",
+        roleSalary: 35000,
+        departmentId: 1,
+        departmentName: "Sales",
+      },
+    ];
 
-        const executeMock= jest.fn();
-        const DbMock = jest.fn();
+    const expectedEmployees = employeeData.map((x) => {
+      const department = new Department(x.departmentId, x.departmentName);
+      const role = new Role(x.roleId, x.roleTitle, x.roleSalary, department);
+      return new Employee(x.id, x.firstName, x.lastName, role);
+    });
 
-        executeMock.mockImplementation(() => Promise.resolve([expectedEmployees]));
-        DbMock.mockImplementation(() => {
-            return {
-                execute: executeMock,
-            };
-        });
+    const executeMock = jest.fn();
+    const DbMock = jest.fn();
 
-        const dbMock = new DbMock();
+    executeMock.mockImplementation(() => Promise.resolve([employeeData]));
+    DbMock.mockImplementation(() => {
+      return {
+        execute: executeMock,
+      };
+    });
 
-        const employeesRepository = new EmployeesRepository(dbMock);
-        const employees = await employeesRepository.getEmployees();
+    const dbMock = new DbMock();
 
-        expect(executeMock).toHaveBeenCalledTimes(1);
-        expect(executeMock).toBeCalledWith(`SELECT employee.id, employee.firstName, employee.lastName, roles.title AS title, department.name AS department, roles.salary, employee.manager from employee, roles, department WHERE employee.role = roles.id and roles.department = department.id`);
-        expect(employees).toEqual(expectedEmployees);
-    })
-})
+    const employeesRepository = new EmployeesRepository(dbMock);
+    const employees = await employeesRepository.getEmployees();
+
+    expect(executeMock).toHaveBeenCalledTimes(1);
+    expect(executeMock).toBeCalledWith(
+      formatSql(`SELECT
+        e.id id,
+        e.firstName firstName,
+        e.lastName lastName,
+        r.id roleId,
+        r.title roleTitle,
+        r.salary roleSalary,
+        d.id departmentId,
+        d.name departmentName
+      FROM employee e
+      JOIN roles r ON e.roleId = r.id
+      JOIN department d ON r.departmentId = d.id`)
+    );
+    expect(employees).toEqual(expectedEmployees);
+  });
+});
